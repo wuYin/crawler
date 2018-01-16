@@ -38,19 +38,18 @@ function decodeMessage($socket) {
 // 解析直播间弹幕、礼物信息
 function parseRespJson($resp) {
 	$resp = json_decode($resp, true);
+	$conn = connectDB();
 	switch ($resp['cmd']) {
 		case 'DANMU_MSG':
 			// 弹幕消息
-			echo $resp['info'][2][1] . " : " . $resp['info'][1] . PHP_EOL;
-			break;
-		case 'WELCOME':
-			// 直播间欢迎信息
-			echo '欢迎' . $resp['data']['uname'] . '进入直播间' . PHP_EOL;
+			insertDanmu($conn, $resp['info']);
 			break;
 		case 'SEND_GIFT':
 			// 直播间送礼物信息
-			$data = $resp['data'];
-			echo $data['uname'] . ' 赠送' . $data['num'] . '份' . $data['giftName'] . PHP_EOL;
+			insertGift($conn, $resp['data']);
+			break;
+		case 'WELCOME':
+			// 直播间欢迎信息
 			break;
 		default:
 			// 新添加的消息类型
