@@ -1,11 +1,6 @@
 <?php
 
-const ROOM_INIT_API   = 'https://api.live.bilibili.com/room/v1/Room/room_init?id=';
-const ROOM_SERVER_API = 'https://api.live.bilibili.com/api/player?id=cid:';
-
-const ACTION_ENTRY     = 7;
-const ACTION_HEARTBEAT = 2;
-const UID              = 18466419;
+require_once 'const.php';
 
 
 // 连接到弹幕服务器
@@ -51,4 +46,43 @@ function getRealRoomID($shortID) {
 		exit($shortID . ' : ' . $resp['msg']);
 	}
 	return $resp['data']['room_id'];
+}
+
+
+// 连接到数据库
+function connectDB() {
+	$conn = new mysqli(DB_HOST, DB_USER, DB_PASSWD, DB_NAME);
+	if (mysqli_connect_error()) {
+		echo mysqli_connect_error();
+	}
+	mysqli_set_charset($conn, 'utf8');
+	return $conn;
+}
+
+// 插入弹幕数据
+function insertDanmu($conn, $info) {
+	$sql = "INSERT INTO danmu (uid, uname, `level`, content) VALUES ({$info[2][0]}, '{$info[2][1]}', {$info[4][0]}, '$info[1]')";
+	$res = $conn->query($sql);
+	if ($res === false) {
+		echo 'SQL insert error: ' . $sql . PHP_EOL . $conn->error;
+		exit;
+	}
+	return $conn->insert_id;
+}
+
+
+function insertGift($conn, $data) {
+	$sql = "INSERT INTO gifts (uid, gift_id, gift_name, price, num) VALUES (
+							  {$data['uid']}, {$data['giftId']},  '{$data['giftName']}', {$data['price']}, {$data['num']})";
+	$res = $conn->query($sql);
+	if ($res === false) {
+		echo 'SQL insert error: ' . $sql . PHP_EOL . $conn->error;
+		exit;
+	}
+	return $conn->insert_id;
+}
+
+function pr($var) {
+	print_r($var);
+	exit;
 }
