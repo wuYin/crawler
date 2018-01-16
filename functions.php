@@ -53,15 +53,16 @@ function getRealRoomID($shortID) {
 function connectDB() {
 	$conn = new mysqli(DB_HOST, DB_USER, DB_PASSWD, DB_NAME);
 	if (mysqli_connect_error()) {
-		echo mysqli_connect_error();
+		echo 'MySQL connect error: ' . mysqli_connect_error();
+		exit;
 	}
-	mysqli_set_charset($conn, 'utf8');
+	mysqli_set_charset($conn, 'utf8mb4');
 	return $conn;
 }
 
 // 插入弹幕数据
-function insertDanmu($conn, $info) {
-	$sql = "INSERT INTO danmu (uid, uname, `level`, content) VALUES ({$info[2][0]}, '{$info[2][1]}', {$info[4][0]}, '$info[1]')";
+function insertDanmu($conn, $roomID, $info) {
+	$sql = "INSERT INTO danmu (room_id, uid, uname, `level`, content) VALUES ($roomID, {$info[2][0]}, '{$info[2][1]}', {$info[4][0]}, '$info[1]')";
 	$res = $conn->query($sql);
 	if ($res === false) {
 		echo 'SQL insert error: ' . $sql . PHP_EOL . $conn->error;
@@ -71,9 +72,9 @@ function insertDanmu($conn, $info) {
 }
 
 
-function insertGift($conn, $data) {
-	$sql = "INSERT INTO gifts (uid, gift_id, gift_name, price, num) VALUES (
-							  {$data['uid']}, {$data['giftId']},  '{$data['giftName']}', {$data['price']}, {$data['num']})";
+function insertGift($conn, $roomID, $data) {
+	$sql = "INSERT INTO gifts (room_id, uid, gift_id, gift_name, price, num) VALUES (
+							  $roomID, {$data['uid']}, {$data['giftId']},  '{$data['giftName']}', {$data['price']}, {$data['num']})";
 	$res = $conn->query($sql);
 	if ($res === false) {
 		echo 'SQL insert error: ' . $sql . PHP_EOL . $conn->error;
@@ -82,6 +83,14 @@ function insertGift($conn, $data) {
 	return $conn->insert_id;
 }
 
+
+// 内存单位转换
+function convert($size) {
+	$unit = array('b', 'kb', 'mb', 'gb', 'tb', 'pb');
+	return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
+}
+
+// 调试函数
 function pr($var) {
 	print_r($var);
 	exit;
