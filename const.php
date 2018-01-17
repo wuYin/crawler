@@ -15,3 +15,6 @@ const DB_NAME   = 'bilibili';
 const DB_HOST   = '127.0.0.1';
 const DB_USER   = 'root';
 const DB_PASSWD = '123456';
+
+
+const GIFT_RATE = 1000;        // B 站礼物 1000 金瓜子 = 1 RMB

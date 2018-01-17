@@ -8,12 +8,15 @@ if (!is_numeric($shortID)) {
 	exit('Usage like: php crawler.php 5441');
 }
 
+$conn   = connectDB();
 $roomID = getRealRoomID($shortID);
 recordVideo($roomID);
 
 $server  = getServer($roomID);
 $socket  = connectServer($server['ip'], $server['port'], $roomID);
 $message = decodeMessage($socket);
+analysisDanmu($conn, $roomID);
+analysisGifts($conn, $roomID);
 
 
 // 解码服务器返回的数据消息
@@ -41,8 +44,8 @@ function decodeMessage($socket) {
 // 解析直播间弹幕、礼物信息
 function parseRespJson($resp) {
 	global $roomID;
+	global $conn;
 	$resp = json_decode($resp, true);
-	$conn = connectDB();
 	switch ($resp['cmd']) {
 		case 'DANMU_MSG':
 			// 弹幕消息
