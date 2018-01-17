@@ -71,7 +71,7 @@ function insertDanmu($conn, $roomID, $info) {
 	return $conn->insert_id;
 }
 
-
+// 插入礼物数据
 function insertGift($conn, $roomID, $data) {
 	$sql = "INSERT INTO gifts (room_id, uid, gift_id, gift_name, price, num) VALUES (
 							  $roomID, {$data['uid']}, {$data['giftId']},  '{$data['giftName']}', {$data['price']}, {$data['num']})";
@@ -81,6 +81,19 @@ function insertGift($conn, $roomID, $data) {
 		exit;
 	}
 	return $conn->insert_id;
+}
+
+
+// 录视频
+function recordVideo($roomID) {
+	$resp = json_decode(file_get_contents(ROOM_PLAY_API . $roomID), true);
+	if (!$resp['data']) {
+		exit('无法录制视频，请确认房间号无误');
+	}
+	$wsURL    = $resp['data']['durl'][0]['url'];
+	$savePath = VIDEO_SAVE_DIR . $roomID . '.mp4';
+	$cmd      = FFMPEG_EXEC_PATH . ' -i "' . $wsURL . '" -y -vcodec copy -acodec copy -f mp4 "' . $savePath . '" > /dev/null 2>&1 & ';
+	exec($cmd);
 }
 
 

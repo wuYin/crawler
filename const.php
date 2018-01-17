@@ -2,6 +2,10 @@
 
 const ROOM_INIT_API   = 'https://api.live.bilibili.com/room/v1/Room/room_init?id=';
 const ROOM_SERVER_API = 'https://api.live.bilibili.com/api/player?id=cid:';
+const ROOM_PLAY_API   = 'https://api.live.bilibili.com/room/v1/Room/playUrl?cid=';
+
+const FFMPEG_EXEC_PATH = '/Users/wuyin/Desktop/ffmpeg/bin/ffmpeg';
+const VIDEO_SAVE_DIR   = '/Users/wuyin/Desktop/';
 
 const ACTION_ENTRY     = 7;
 const ACTION_HEARTBEAT = 2;
