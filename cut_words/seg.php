@@ -10,8 +10,14 @@ $freqs     = generatePrefixDict();
 $DAG       = getDAG($sentence);
 $wordPreqs = $freqs['word_freqs'];
 $totalFreq = $freqs['total_freq'];
-$allWords = divideSentence($sentence, $DAG);
-print_r($allWords);
+
+// echo '将语句分为各个有可能组合的词语...' . PHP_EOL;
+// $allWords = divideAllWords($sentence, $DAG);
+// print_r($allWords);
+
+echo '将语句分为各个最细粒度的词语...' . PHP_EOL;
+$semanticWords = divideSemanticWords($wordPreqs, $totalFreq, $sentence, $DAG);
+print_r($semanticWords);
 
 
 // 生成前缀词典
@@ -81,7 +87,7 @@ function getDAG($sentence) {
 }
 
 // 将句子尽可能多的分割为最小粒度的词语
-function divideSentence($sentence, $DAG) {
+function divideAllWords($sentence, $DAG) {
 	$end   = -1;
 	$words = [];
 	foreach ($DAG as $loc => $nextLocs) {
@@ -104,11 +110,11 @@ function divideSentence($sentence, $DAG) {
 	return $words;
 }
 
-// 返回后向分割的字串
-function splitFromEnd($words, $end) {
+// 返回分割的中文字串
+function splitByIndexes($words, $start, $end) {
 	$str = '';
 	foreach ($words as $loc => $word) {
-		if ($loc >= $end) {
+		if ($loc >= $start && $loc <= $end) {
 			$str .= $word;
 		}
 	}
@@ -120,24 +126,39 @@ function mbStrSplit($str) {
 	return preg_split('/(?<!^)(?!$)/u', $str);
 }
 
-// 语义分割
-function calculate($wordFreqs, $totalFreq, $sentence, $DAG) {
-	$words          = mbStrSplit($sentence);
-	$route          = [];
-	$length         = count($words);
-	$route[$length] = [0, 0];
+// 最大概率的语义分割
+function divideSemanticWords($wordFreqs, $totalFreq, $sentence, $DAG) {
+	$words           = mbStrSplit($sentence);
+	$length          = count($words);
+	$routes[$length] = [0, 0];
 	// 从后向前计算路径值
-	for ($forward = $length - 1; $forward >= 0; $forward--) {
-
-		foreach ($DAG[$forward] as $loc => $path) {
+	for ($loc = $length - 1; $loc >= 0; $loc--) {
+		$max        = -1000;
+		$maxNextLoc = 0;
+		foreach ($DAG[$loc] as $nextLoc) {
 			// 计算对数概率得分
-			$max       = 0;
-			$tempStr   = splitFromEnd($words, $forward);
-			$freq      = $wordFreqs[$tempStr];
-			$wordScore = $freq == 0 ? 0 : log($freq);
-			$result    = $wordScore - log($totalFreq) + $route[$forward + 1][0];
-			$max       = $result > $max ? $result : $max;
+			$tempStr   = splitByIndexes($words, $loc, $nextLoc);
+			$freq      = array_key_exists($tempStr, $wordFreqs) ? $wordFreqs[$tempStr] : 0;
+			$wordScore = $freq == 0 ? 1 : $freq;
+			$result    = log($wordScore) - log($totalFreq) + $routes[$nextLoc + 1][0];
+			if ($result > $max) {
+				$max        = $result;
+				$maxNextLoc = $nextLoc;
+			}
 		}
-		$route[$forward] = [$max, $path];
+		$routes[$loc] = [$max, $maxNextLoc];
 	}
+
+	$semanticWords = [];
+	$startLoc      = 0;
+	while ($startLoc != $length) {
+		$route           = $routes[$startLoc];
+		$semanticWords[] = splitByIndexes($words, $startLoc, $route[1]);
+		if ($startLoc == $route[1]) {
+			$startLoc++;
+		} else {
+			$startLoc = $route[1] + 1;      // 直接从下一个词开始
+		}
+	}
+	return $semanticWords;
 }
