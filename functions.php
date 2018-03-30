@@ -140,7 +140,7 @@ function recordVideo($roomID) {
 
 	// 第一个视频源不易连接上，使用第二、三个较好
 	$wsURL    = $resp['data']['durl'][1]['url'];
-	$start    = date('Y-m-d_H:i:s', time());
+	$start    = date('Y-m-d_H.i.s', time());
 	$savePath = VIDEO_SAVE_DIR . $roomID . '_' . $start . '.mp4';
 	$cmd      = FFMPEG_EXEC_PATH . ' -i "' . $wsURL . '" -y -vcodec copy -acodec copy -f mp4 "' . $savePath . '" > /dev/null 2>&1 & ';
 	exec($cmd);
