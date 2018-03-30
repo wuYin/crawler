@@ -1,5 +1,6 @@
 <?php
 
+require_once 'config.php';
 require_once 'const.php';
 
 
@@ -57,6 +58,7 @@ function connectDB() {
 		exit;
 	}
 	mysqli_set_charset($conn, 'utf8mb4');
+	echo '数据库连接成功'.PHP_EOL;
 	return $conn;
 }
 
