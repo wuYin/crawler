@@ -10,58 +10,13 @@ if (!is_numeric($shortID)) {
 
 $conn   = connectDB();
 $roomID = getRealRoomID($shortID);
-recordVideo($roomID);
+
+// recordVideo($roomID);
 
 $server  = getServer($roomID);
 $socket  = connectServer($server['ip'], $server['port'], $roomID);
 $message = decodeMessage($socket);
-analysisDanmu($conn, $roomID);
-analysisGifts($conn, $roomID);
+// analysisDanmu($conn, $roomID);
+// analysisGifts($conn, $roomID);
 
-
-// 解码服务器返回的数据消息
-function decodeMessage($socket) {
-	while (true) {
-		while ($out = socket_read($socket, 16)) {
-			$res = unpack('N', $out);
-			if ($res[1] != 16) {
-				break;
-			}
-		}
-		$message = socket_read($socket, $res[1] - 16);
-		parseRespJson($message);
-
-		global $timestamp;
-		if (time() - $timestamp > 30) {
-			sendHeartBeatPkg($socket);
-			$timestamp = time();
-		}
-	}
-	socket_close($socket);
-}
-
-
-// 解析直播间弹幕、礼物信息
-function parseRespJson($resp) {
-	global $roomID;
-	global $conn;
-	$resp = json_decode($resp, true);
-	switch ($resp['cmd']) {
-		case 'DANMU_MSG':
-			// 弹幕消息
-			echo $resp['info'][2][1] . " : " . $resp['info'][1] . PHP_EOL;
-			insertDanmu($conn, $roomID, $resp['info']);
-			break;
-		case 'SEND_GIFT':
-			// 直播间送礼物信息
-			$data = $resp['data'];
-			echo $data['uname'] . ' 赠送' . $data['num'] . '份' . $data['giftName'] . PHP_EOL;
-			insertGift($conn, $roomID, $resp['data']);
-			break;
-		case 'WELCOME':
-			// 直播间欢迎信息
-			break;
-		default:
-			// 新添加的消息类型
-	}
-}
+decodeMessage($socket);

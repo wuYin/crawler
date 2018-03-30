@@ -4,29 +4,26 @@ require_once 'config.php';
 require_once 'const.php';
 
 
-// 连接到弹幕服务器
-function connectServer($ip, $port, $roomID) {
-	$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-	socket_connect($socket, $ip, $port);
-	$str = packMsg($roomID, UID);
-	socket_write($socket, $str, strlen($str));
-	return $socket;
+// 连接到数据库
+function connectDB() {
+	$conn = new mysqli(DB_HOST, DB_USER, DB_PASSWD, DB_NAME);
+	if (mysqli_connect_error()) {
+		echo 'MySQL connect error: ' . mysqli_connect_error();
+		exit;
+	}
+	mysqli_set_charset($conn, 'utf8mb4');
+	echo '数据库连接成功' . PHP_EOL;
+	return $conn;
 }
 
-
-// 发送心跳包
-function sendHeartBeatPkg($socket) {
-	$str = pack('NnnNN', 16, 16, 1, ACTION_HEARTBEAT, 1);
-	socket_write($socket, $str, strlen($str));
+// 获取直播间真实房间号
+function getRealRoomID($shortID) {
+	$resp = json_decode(file_get_contents(ROOM_INIT_API . $shortID), true);
+	if ($resp['code']) {
+		exit($shortID . ' : ' . $resp['msg']);
+	}
+	return $resp['data']['room_id'];
 }
-
-
-// 打包请求
-function packMsg($roomID, $uid) {
-	$data = json_encode(['roomid' => $roomID, 'uid' => $uid]);
-	return pack('NnnNN', 16 + strlen($data), 16, 1, ACTION_ENTRY, 1) . $data;
-}
-
 
 // 获取弹幕服务器的 ip 和端口号
 function getServer($roomID) {
@@ -39,28 +36,74 @@ function getServer($roomID) {
 	return ['ip' => $ip, 'port' => $port];
 }
 
+// 打包请求
+function packMsg($roomID, $uid) {
+	$data = json_encode(['roomid' => $roomID, 'uid' => $uid]);
+	return pack('NnnNN', 16 + strlen($data), 16, 1, ACTION_ENTRY, 1) . $data;
+}
 
-// 获取直播间真实房间号
-function getRealRoomID($shortID) {
-	$resp = json_decode(file_get_contents(ROOM_INIT_API . $shortID), true);
-	if ($resp['code']) {
-		exit($shortID . ' : ' . $resp['msg']);
-	}
-	return $resp['data']['room_id'];
+// 连接到弹幕服务器
+function connectServer($ip, $port, $roomID) {
+	$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+	socket_connect($socket, $ip, $port);
+	$str = packMsg($roomID, UID);
+	socket_write($socket, $str, strlen($str));
+	return $socket;
 }
 
 
-// 连接到数据库
-function connectDB() {
-	$conn = new mysqli(DB_HOST, DB_USER, DB_PASSWD, DB_NAME);
-	if (mysqli_connect_error()) {
-		echo 'MySQL connect error: ' . mysqli_connect_error();
-		exit;
+// 解码服务器返回的数据消息
+function decodeMessage($socket) {
+	while (true) {
+		while ($out = socket_read($socket, 16)) {
+			$res = unpack('N', $out);
+			if ($res[1] != 16) {
+				break;
+			}
+		}
+		$message = socket_read($socket, $res[1] - 16);
+		parseRespJson($message);
+
+		global $timestamp;
+		if (time() - $timestamp > 30) {
+			sendHeartBeatPkg($socket);
+			$timestamp = time();
+		}
 	}
-	mysqli_set_charset($conn, 'utf8mb4');
-	echo '数据库连接成功'.PHP_EOL;
-	return $conn;
+	socket_close($socket);
 }
+
+// 解析直播间弹幕、礼物信息
+function parseRespJson($resp) {
+	global $roomID;
+	global $conn;
+	$resp = json_decode($resp, true);
+	switch ($resp['cmd']) {
+		case 'DANMU_MSG':
+			// 弹幕消息
+			echo $resp['info'][2][1] . " : " . $resp['info'][1] . PHP_EOL;
+			insertDanmu($conn, $roomID, $resp['info']);
+			break;
+		case 'SEND_GIFT':
+			// 直播间送礼物信息
+			$data = $resp['data'];
+			echo $data['uname'] . ' 赠送' . $data['num'] . '份' . $data['giftName'] . PHP_EOL;
+			insertGift($conn, $roomID, $resp['data']);
+			break;
+		case 'WELCOME':
+			// 直播间欢迎信息
+			break;
+		default:
+			// 新添加的消息类型
+	}
+}
+
+// 发送心跳包
+function sendHeartBeatPkg($socket) {
+	$str = pack('NnnNN', 16, 16, 1, ACTION_HEARTBEAT, 1);
+	socket_write($socket, $str, strlen($str));
+}
+
 
 // 插入弹幕数据
 function insertDanmu($conn, $roomID, $info) {
