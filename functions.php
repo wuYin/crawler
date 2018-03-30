@@ -62,9 +62,15 @@ function decodeMessage($socket) {
 			if ($res[1] != 16) {
 				break;
 			}
+			unset($out);
 		}
-		$message = socket_read($socket, $res[1] - 16);
+		if ($res[1] > MAX_ALLOW_MEMORY) {
+			echo '丢弃异常消息包' . PHP_EOL;
+			continue;
+		}
+		$message = @socket_read($socket, $res[1] - 16);
 		parseRespJson($message);
+		unset($message, $res);
 
 		global $timestamp;
 		if (time() - $timestamp > 30) {

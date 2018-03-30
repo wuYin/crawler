@@ -10,4 +10,9 @@ const FFMPEG_EXEC_PATH = 'ffmpeg';
 /**
  * 录像的保存路径
  */
-const VIDEO_SAVE_DIR   = '/Users/wuyin/Desktop/';
+const VIDEO_SAVE_DIR = '/Users/wuyin/Desktop/';
+
+/**
+ * 最大可使用的内存
+ */
+const MAX_ALLOW_MEMORY = 4 * 1024 * 1024 * 1024;  // 4 GB
