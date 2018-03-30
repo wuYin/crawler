@@ -6,7 +6,7 @@ const ROOM_PLAY_API   = 'https://api.live.bilibili.com/room/v1/Room/playUrl?cid=
 
 const ACTION_ENTRY     = 7;
 const ACTION_HEARTBEAT = 2;
-const UID              = 18466419;
+const UID              = 322892;
 
 const DB_NAME   = 'bilibili';
 const DB_HOST   = '127.0.0.1';

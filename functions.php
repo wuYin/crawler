@@ -58,7 +58,7 @@ function connectServer($ip, $port, $roomID) {
 function decodeMessage($socket) {
 	while (true) {
 		while ($out = socket_read($socket, 16)) {
-			$res = unpack('N', $out);
+			$res = @unpack('N', $out);
 			if ($res[1] != 16) {
 				break;
 			}

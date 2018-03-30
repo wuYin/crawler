@@ -30,5 +30,4 @@ $socket = connectServer($server['ip'], $server['port'], $roomID);
 // 处理弹幕和礼物消息
 decodeMessage($socket);
 
-analysisDanmu($conn, $roomID);
-analysisGifts($conn, $roomID);
+exit('脚本结束执行');
