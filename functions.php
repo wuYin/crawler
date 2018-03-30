@@ -22,7 +22,9 @@ function getRealRoomID($shortID) {
 	if ($resp['code']) {
 		exit($shortID . ' : ' . $resp['msg']);
 	}
-	return $resp['data']['room_id'];
+	$roomID = $resp['data']['room_id'];
+	echo $shortID . ' 的真实房间号为：' . $roomID . PHP_EOL;
+	return $roomID;
 }
 
 // 获取弹幕服务器的 ip 和端口号
@@ -135,10 +137,14 @@ function recordVideo($roomID) {
 	if (!$resp['data']) {
 		exit('无法录制视频，请确认房间号无误');
 	}
-	$wsURL    = $resp['data']['durl'][0]['url'];
-	$savePath = VIDEO_SAVE_DIR . $roomID . '.mp4';
+
+	// 第一个视频源不易连接上，使用第二、三个较好
+	$wsURL    = $resp['data']['durl'][1]['url'];
+	$start    = date('Y-m-d_H:i:s', time());
+	$savePath = VIDEO_SAVE_DIR . $roomID . '_' . $start . '.mp4';
 	$cmd      = FFMPEG_EXEC_PATH . ' -i "' . $wsURL . '" -y -vcodec copy -acodec copy -f mp4 "' . $savePath . '" > /dev/null 2>&1 & ';
 	exec($cmd);
+	echo '开始录制 ' . $roomID . ' 直播间的视频，已保存到 ' . $savePath . PHP_EOL;
 }
 
 
