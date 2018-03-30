@@ -154,12 +154,12 @@ function recordVideo($roomID) {
 }
 
 
-// 分析弹幕数据
+// 分析弹幕的数量数据
 function analysisDanmu($conn, $roomID) {
 	$sql = 'SELECT created_at FROM danmu WHERE room_id = ' . $roomID;
 	$res = $conn->query($sql);
 	if (!$res->num_rows) {
-		return;
+		return [];
 	}
 	$set = [];
 	while ($time = $res->fetch_assoc()) {
@@ -168,13 +168,27 @@ function analysisDanmu($conn, $roomID) {
 	return $set;
 }
 
-
-// 分析礼物数据
-function analysisGifts($conn, $roomID) {
+// 分析礼物的数量数据
+function analysisGiftNums($conn, $roomID) {
 	$sql = 'SELECT created_at, price, num FROM gifts WHERE room_id = ' . $roomID;
 	$res = $conn->query($sql);
 	if (!$res->num_rows) {
-		return;
+		return [];
+	}
+	$set = [];
+	while ($gift = $res->fetch_assoc()) {
+		@$set[date('H:i', strtotime($gift['created_at']))] += $gift['num'];
+	}
+	return $set;
+}
+
+
+// 分析礼物的价值数据
+function analysisGiftValues($conn, $roomID) {
+	$sql = 'SELECT created_at, price, num FROM gifts WHERE room_id = ' . $roomID;
+	$res = $conn->query($sql);
+	if (!$res->num_rows) {
+		return [];
 	}
 	$set = [];
 	while ($gift = $res->fetch_assoc()) {

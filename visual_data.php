@@ -5,7 +5,7 @@ $danmu       = analysisDanmu($conn, $_GET['room_id']);
 $danmuKeys   = implode('","', array_keys($danmu));
 $danmuValues = implode('","', array_values($danmu));
 
-$gifts      = analysisGifts($conn, $_GET['room_id']);
+$gifts      = analysisGiftValues($conn, $_GET['room_id']);
 $giftKeys   = implode('","', array_keys($gifts));
 $giftValues = implode('","', array_values($gifts));
 ?>
