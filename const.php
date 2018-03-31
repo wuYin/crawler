@@ -26,6 +26,7 @@ const GIFT_RATE = 1000;        // B 站礼物 1000 金瓜子 = 1 RMB
  * 加上高能的前因后果，m1, m2, m3 连续的三分钟视频就是高质量素材
  */
 // 弹幕增减标准
+// 根据在线人数适当调整，像痒局长这样人气很高的大主播可以设大一点，小主播可以设小一些
 const BARRAGE_RATE_UP   = 2;
 const BARRAGE_RATE_DOWN = 0.5;
 
