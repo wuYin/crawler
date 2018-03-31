@@ -1,4 +1,3 @@
-cut_words/dict.txt  # curl https://raw.githubusercontent.com/fxsjy/jieba/master/jieba/dict.txt > dict.txt
 .idea
 videos
 ffmper_edit.log
