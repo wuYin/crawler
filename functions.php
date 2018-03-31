@@ -22,6 +22,10 @@ function getRealRoomID($shortID) {
 	if ($resp['code']) {
 		exit($shortID . ' : ' . $resp['msg']);
 	}
+
+	if ($resp['data']['room_status'] == 0) {
+		exit('直播间未开播');
+	}
 	$roomID = $resp['data']['room_id'];
 	echo $shortID . ' 的真实房间号为：' . $roomID . PHP_EOL;
 	return $roomID;
@@ -115,8 +119,10 @@ function sendHeartBeatPkg($socket) {
 
 // 插入弹幕数据
 function insertDanmu($conn, $roomID, $info) {
-	$sql = "INSERT INTO danmu (room_id, uid, uname, `level`, content) VALUES ($roomID, {$info[2][0]}, '{$info[2][1]}', {$info[4][0]}, '$info[1]')";
-	$res = $conn->query($sql);
+	$uname   = mysqli_real_escape_string($conn, $info[2][0]);
+	$content = mysqli_real_escape_string($conn, $info[4][0]);
+	$sql     = "INSERT INTO danmu (room_id, uid, uname, `level`, content) VALUES ($roomID, {$info[2][0]}, '$uname', {$info[4][0]}, '$content')";
+	$res     = $conn->query($sql);
 	if ($res === false) {
 		echo 'SQL insert error: ' . $sql . PHP_EOL . $conn->error;
 		exit;
@@ -144,8 +150,8 @@ function recordVideo($roomID) {
 		exit('无法录制视频，请确认房间号无误');
 	}
 
-	// 第一个视频源连接稳定
-	$wsURL    = $resp['data']['durl'][0]['url'];
+	// 小主播使用主线视频源， 大主播使用备用视频源（播放器中切换的路线），才容易连上
+	$wsURL    = $resp['data']['durl'][2]['url'];
 	$start    = date('Y-m-d_H.i.s', time());
 	$savePath = VIDEO_SAVE_DIR . $roomID . '_' . $start . '.mp4';
 	$cmd      = FFMPEG_EXEC_PATH . ' -i "' . $wsURL . '" -c copy -f mp4 "' . $savePath . '" > /dev/null 2>&1 & ';
