@@ -144,11 +144,11 @@ function recordVideo($roomID) {
 		exit('无法录制视频，请确认房间号无误');
 	}
 
-	// 第一个视频源不易连接上，使用第二、三个较好
-	$wsURL    = $resp['data']['durl'][1]['url'];
+	// 第一个视频源连接稳定
+	$wsURL    = $resp['data']['durl'][0]['url'];
 	$start    = date('Y-m-d_H.i.s', time());
 	$savePath = VIDEO_SAVE_DIR . $roomID . '_' . $start . '.mp4';
-	$cmd      = FFMPEG_EXEC_PATH . ' -i "' . $wsURL . '" -y -vcodec copy -acodec copy -f mp4 "' . $savePath . '" > /dev/null 2>&1 & ';
+	$cmd      = FFMPEG_EXEC_PATH . ' -i "' . $wsURL . '" -c copy -f mp4 "' . $savePath . '" > /dev/null 2>&1 & ';
 	exec($cmd);
 	echo '开始录制 ' . $roomID . ' 直播间的视频，已保存到 ' . $savePath . PHP_EOL;
 }
