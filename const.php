@@ -27,9 +27,9 @@ const GIFT_RATE = 1000;        // B 站礼物 1000 金瓜子 = 1 RMB
  */
 // 弹幕增减标准
 // 根据在线人数适当调整，像痒局长这样人气很高的大主播可以设大一点，小主播可以设小一些
-const BARRAGE_RATE_UP   = 2;
-const BARRAGE_RATE_DOWN = 0.5;
+const BARRAGE_RATE_UP   = 1.5;
+const BARRAGE_RATE_DOWN = 0.8;
 
 // 礼物增减标准
-const GIFT_RATE_UP   = 2.5;
-const GIFT_RATE_DOWN = 0.4;
+const GIFT_RATE_UP   = 1.5;
+const GIFT_RATE_DOWN = 0.8;
