@@ -23,7 +23,7 @@ function getRealRoomID($shortID) {
 		exit($shortID . ' : ' . $resp['msg']);
 	}
 
-	if ($resp['data']['room_status'] == 0) {
+	if ($resp['data']['live_status'] == 0) {
 		exit('直播间未开播');
 	}
 	$roomID = $resp['data']['room_id'];
