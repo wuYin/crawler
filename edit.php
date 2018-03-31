@@ -32,7 +32,7 @@ $giftFunTimes    = getFunTimes($giftValues, GIFT_RATE_UP, GIFT_RATE_DOWN);
 $funTimes        = mergeFunTimes($barrageFunTimes, $giftFunTimes);
 
 // 剪辑视频
-editVideo($startLiveTime, $funTimes, $videoPath);
+editVideo($roomID, $startLiveTime, $funTimes, $videoPath);
 
 
 /**
@@ -105,25 +105,25 @@ function mergeFunTimes($barrageFunTimes, $giftFunTimes) {
  * @param $times         array  精彩时刻
  * @param $path          string 录制视频的路径
  */
-function editVideo($startLiveTime, $times, $path) {
+function editVideo($roomID, $startLiveTime, $times, $path) {
 	if (empty($times)) {
 		return;
 	}
 
-	$saveDir = substr($path, 0, strlen($path) - 4);
-	shell_exec('mkdir ' . $saveDir);
-	$i = 0;
+	// 录像的保存文件夹
+	$saveDir = './videos/' . $roomID . '/' . date('Y-m-d', $startLiveTime) . '/' . date('H.i.s', $startLiveTime);
+	shell_exec('mkdir -p ' . $saveDir);
 	foreach ($times as $time) {
 		$diff      = strtotime($time) - $startLiveTime;
 		$editStart = $diff > 60 ? $diff : strtotime($time);
 		$start     = date('H:i:s', $editStart);
-		$saveFile  = $path . '/' . $i . '.mp4';
-		$cmd       = FFMPEG_EXEC_PATH . ' -i ' . $path . ' -ss ' . $start . ' -t 120 ' . ' -c copy ' . $saveFile;
-		pr($cmd);
+		$saveFile  = $saveDir . '/' . str_replace(':', '.', $time) . '.mp4';
+		$cmd       = FFMPEG_EXEC_PATH . ' -i ' . $path . ' -ss ' . $start . ' -t 120 ' . ' -vcodec copy -acodec copy ' .
+			$saveFile . '  > ffmper_edit.log 2>&1 & ';
 		exec($cmd);
-		$i++;
 		echo '完成视频 ' . $start . ' 开始的剪辑' . PHP_EOL;
 	}
+	echo '剪辑完成 :)' . PHP_EOL;
 }
 
 
