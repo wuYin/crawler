@@ -5,16 +5,6 @@
 抓取细节：[B 站直播间数据爬虫](https://wuyin.io/2018/03/31/bilibili-live-crawler-and-auto-edit-recording/#more)
 
 
-
-## 四月 TODO：
-
-- 将代码封装为 composer package
-- 使用 semantic-ui 实现爬虫的开启、终止和状态查看界面
-- 优化剪辑的参数
-
-
-
-
 ## 前言
 
 ### 起因
@@ -61,24 +51,25 @@
 
 ### 弹幕、礼物和礼物数据爬虫：
 
-![](http://p2j5s8fmr.bkt.clouddn.com/crawler.png)
+<img src="https://contents.yinzige.com/crawler.png" width=70%/>
 
 ### 弹幕分析：
 
-![](http://p2j5s8fmr.bkt.clouddn.com/cuts.png)
+<img src="https://contents.yinzige.com/cuts.png" width=70%/>
 
 
 
 ### 弹幕数据统计：
 
- ![](http://p2j5s8fmr.bkt.clouddn.com/visu.png)
+<img src="https://contents.yinzige.com/visu.png" width=70%/>
 
 
 
 ### 根据弹幕和礼物高峰自动剪辑
 
-![](http://p2j5s8fmr.bkt.clouddn.com/edit_shell.png)
+<img src="https://contents.yinzige.com/edit_shell.png" width=70%/>
 
 
 
-### 精彩集锦的素材![](http://p2j5s8fmr.bkt.clouddn.com/saved.png)
+### 精彩集锦的素材
+<img src="https://contents.yinzige.com/saved.png" width=70%/>
